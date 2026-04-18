@@ -502,11 +502,11 @@ class WallSystemData(BaseModel):
 
 # ------------------------ Agent State ----------------------------
 class AgentState(BaseModel):
-    pdf_buffer: io.BytesIO
-    structure_report: str
+    file_uri: str
+    file_name: str
     roof_system: RoofSystemData
     floor_system: FloorSystemData
     footing: FootingSystemData
-    Post: PostData
+    post: PostData
     shear_wall: ShearWallData
     wall_system: WallSystemData

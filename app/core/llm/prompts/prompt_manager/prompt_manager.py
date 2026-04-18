@@ -1,6 +1,5 @@
 from typing import Literal
 
-
 class PromptManager:
     def __init__(
         self,

@@ -1,7 +1,10 @@
 fastapi==0.136.0
 python-dotenv==1.2.2
-langgraph==1.1.6
+langgraph==0.3.27
 uvicorn==0.44.0
 uvicorn==0.44.0
 google==3.0.0
 google_genai==1.73.1
+langgraph-checkpoint-sqlite==2.0.11
+langgraph-checkpoint-postgres==3.0.3
+python-multipart==0.0.26

@@ -1,1 +1,1 @@
-from .clients import google_client
+from .clients import google_client_async

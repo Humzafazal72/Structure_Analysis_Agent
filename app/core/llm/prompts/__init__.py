@@ -1,4 +1,4 @@
-from prompt_manager import (
+from .prompt_manager.prompt_manager import (
     SYS_PROMPT_FLOOR,
     SYS_PROMPT_FOOTING,
     SYS_PROMPT_POST,

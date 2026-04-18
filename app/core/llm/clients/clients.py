@@ -1,3 +1,3 @@
 from google.genai import Client
 
-google_client = Client()
+google_client_async = Client().aio
