@@ -1,4 +1,5 @@
 import io
+import json
 import random
 from fastapi import UploadFile, Form, File
 from fastapi import APIRouter, HTTPException
@@ -13,6 +14,7 @@ router = APIRouter()
 
 logger = get_logger(__name__)
 
+
 @router.post("/api/start_agent")
 async def start_agent(structure_plan: UploadFile = File(...), user_id: str = Form(...)):
     try:
@@ -21,7 +23,9 @@ async def start_agent(structure_plan: UploadFile = File(...), user_id: str = For
         file_obj = io.BytesIO(file_content)
 
         async def event_generator():
-            async with AsyncSqliteSaver.from_conn_string("storage/checkpoints.db") as saver:
+            async with AsyncSqliteSaver.from_conn_string(
+                "storage/checkpoints.db"
+            ) as saver:
                 app = workflow.compile(checkpointer=saver)
 
                 config = {"configurable": {"thread_id": f"{user_id}_{project_id}"}}
@@ -41,7 +45,17 @@ async def start_agent(structure_plan: UploadFile = File(...), user_id: str = For
 
                 async for event in app.astream(input=initial_state, config=config):
                     for node_name, node_data in event.items():
-                        yield ({"event": node_name, "data": ""}) #json.dumps(node_data)
+                        serializable_data = {}
+                        for key, value in node_data.items():
+                            if hasattr(value, "model_dump"):
+                                serializable_data[key] = value.model_dump()
+                            else:
+                                serializable_data[key] = value
+
+                        yield {
+                            "event": node_name,
+                            "data": json.dumps(serializable_data),
+                        }
 
         return EventSourceResponse(event_generator())
 

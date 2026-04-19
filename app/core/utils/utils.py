@@ -1,9 +1,9 @@
 from google.genai import types
 from core.llm.clients import google_client_async
 
-async def fetch_with_id(call_id: str, file_uri: str, config: types.GenerateContentConfig):
+async def fetch_with_id(call_id: str, config: types.GenerateContentConfig, file_uri: str, ):
     response = await google_client_async.models.generate_content(
-        model='gemini-2.0-flash',
+        model='gemini-3.1-flash-lite-preview',
         config=config,
         contents=[
             types.Part.from_uri(

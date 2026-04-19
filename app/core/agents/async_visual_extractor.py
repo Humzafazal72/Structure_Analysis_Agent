@@ -1,5 +1,6 @@
 import asyncio
 from google.genai import types
+from google.genai.errors import ClientError
 
 from core.schema import (
     AgentState,
@@ -58,7 +59,7 @@ async def visual_extractor(agent_state: AgentState):
             response_mime_type="application/json",
         )
 
-        file_uri = agent_state["file_uri"]
+        file_uri = agent_state.file_uri
         tasks = [
             fetch_with_id(call_id="floor", config=floor_config, file_uri=file_uri),
             fetch_with_id(call_id="footing", config=footing_config, file_uri=file_uri),
@@ -68,7 +69,6 @@ async def visual_extractor(agent_state: AgentState):
             fetch_with_id(call_id="wall", config=wall_config, file_uri=file_uri),
         ]
 
-        print("came here")
         parsed_data = {}
         for task in asyncio.as_completed(tasks):
             call_id, data = await task
@@ -76,13 +76,17 @@ async def visual_extractor(agent_state: AgentState):
             logger.info(f"Finished {call_id}")
 
         return {
-            "roof_system": parsed_data["roof"],
-            "floor_system": parsed_data["floor"],
-            "footing": parsed_data["footing"],
-            "post": parsed_data["post"],
-            "wall": parsed_data["wall"],
-            "shear_wall": parsed_data["shear_wall"],
+            "roof_system": parsed_data["roof"].model_dump(),
+            "floor_system": parsed_data["floor"].model_dump(),
+            "footing": parsed_data["footing"].model_dump(),
+            "post": parsed_data["post"].model_dump(),
+            "wall": parsed_data["wall"].model_dump(),
+            "shear_wall": parsed_data["shear_wall"].model_dump(),
         }
+    
+    except ClientError as e:
+        logger.error(f"Google API Client Error: {e.message}")
+        raise Exception("AI Quota exceeded or invalid request.")
 
     except Exception as e:
         logger.critical("Error: ", e)
