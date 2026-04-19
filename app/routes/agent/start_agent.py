@@ -6,7 +6,6 @@ from fastapi import APIRouter, HTTPException
 from sse_starlette import EventSourceResponse
 
 from services import get_logger
-from core.workflow import workflow
 from core.llm.clients import google_client_async
 from services import get_graph
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
