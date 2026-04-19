@@ -8,6 +8,7 @@ from sse_starlette import EventSourceResponse
 from services import get_logger
 from core.workflow import workflow
 from core.llm.clients import google_client_async
+from services import get_graph
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
 router = APIRouter()
@@ -21,16 +22,7 @@ async def start_agent(structure_plan: UploadFile = File(...), user_id: str = For
         project_id = random.randint(0, 10000) - random.randint(0, 999)
         file_content = await structure_plan.read()
         file_obj = io.BytesIO(file_content)
-
-        async def event_generator():
-            async with AsyncSqliteSaver.from_conn_string(
-                "storage/checkpoints.db"
-            ) as saver:
-                app = workflow.compile(checkpointer=saver)
-
-                config = {"configurable": {"thread_id": f"{user_id}_{project_id}"}}
-
-                uploaded_file = await google_client_async.files.upload(
+        uploaded_file = await google_client_async.files.upload(
                     file=file_obj,
                     config={
                         "mime_type": "application/pdf",
@@ -38,12 +30,18 @@ async def start_agent(structure_plan: UploadFile = File(...), user_id: str = For
                     },
                 )
 
-                initial_state = {
-                    "file_uri": uploaded_file.uri,
-                    "file_name": uploaded_file.name,
-                }
+        graph_app, cm = await get_graph()
+        config = {"configurable": {"thread_id": f"{user_id}_{project_id}"}}
 
-                async for event in app.astream(input=initial_state, config=config):
+        initial_state = {
+                "file_uri": uploaded_file.uri,
+                "file_name": uploaded_file.name,
+        }
+        print(initial_state)
+
+        async def event_generator():
+            try:
+                async for event in graph_app.astream(input=initial_state, config=config):
                     for node_name, node_data in event.items():
                         serializable_data = {}
                         for key, value in node_data.items():
@@ -51,11 +49,13 @@ async def start_agent(structure_plan: UploadFile = File(...), user_id: str = For
                                 serializable_data[key] = value.model_dump()
                             else:
                                 serializable_data[key] = value
-
                         yield {
                             "event": node_name,
                             "data": json.dumps(serializable_data),
                         }
+            finally:
+                await cm.__aexit__(None, None, None)
+
 
         return EventSourceResponse(event_generator())
 
