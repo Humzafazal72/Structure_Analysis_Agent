@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 
 
 @router.post("/api/start_agent")
-async def start_agent(structure_plan: UploadFile = File(...), user_id: str = Form(...)):
+async def start_agent(structure_plan: UploadFile = File(...)):
     try:
         project_id = random.randint(0, 10000) - random.randint(0, 999)
         file_content = await structure_plan.read()
@@ -30,7 +30,7 @@ async def start_agent(structure_plan: UploadFile = File(...), user_id: str = For
                 )
 
         graph_app, cm = await get_graph()
-        config = {"configurable": {"thread_id": f"{user_id}_{project_id}"}}
+        config = {"configurable": {"thread_id": f"{project_id}"}}
 
         initial_state = {
                 "file_uri": uploaded_file.uri,

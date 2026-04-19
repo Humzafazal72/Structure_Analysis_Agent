@@ -113,7 +113,6 @@ class RoofSystemData(BaseModel):
     hip_valley_rafters: List[HipValleyRafter]
     roof_drop_beams: List[RoofDropBeam]
     roof_flush_beams: List[RoofFlushBeam]
-    uncertain_areas: UncertainAreas
 
 
  # --------------------------- Floor System ---------------------------
@@ -166,7 +165,6 @@ class FloorSystemData(BaseModel):
     floor_joists: List[FloorJoist]
     floor_drop_beams: List[FloorDropBeam]
     floor_flush_beams: List[FloorFlushBeam]
-    uncertain_areas: UncertainAreas
     
 
 
@@ -302,7 +300,6 @@ class FootingSystemData(BaseModel):
     grade_beams: List[GradeBeam]
     slab_on_grade: List[SlabOnGrade]
     holdown_anchors: List[HoldownAnchor]
-    uncertain_areas: UncertainAreas
 
 
 # ----------------------------- Post -------------------------------
@@ -357,7 +354,6 @@ class StandalonePost(BaseModel):
 
 class PostData(BaseModel):
     standalone_posts: List[StandalonePost]
-    uncertain_areas: List[str]
 
 
 # ------------------------- ShearWall ---------------------------
@@ -427,7 +423,6 @@ class ShearWallData(BaseModel):
     braced_wall_lines: List[BracedWallLine]
     shear_walls: List[ShearWall]
     diaphragms: List[Diaphragm]
-    uncertain_areas: UncertainAreas
 
 
 # ------------------------- Wall System ---------------------------
@@ -506,7 +501,6 @@ class WallSystemData(BaseModel):
     headers: List[Header]
     top_plates: List[TopPlate]
     bottom_plates: List[BottomPlate]
-    uncertain_areas: UncertainAreas
 
 
 class AgentState(BaseModel):
