@@ -3,6 +3,7 @@ load_dotenv()
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from services import get_logger
 from routes.agent import start_agent
@@ -12,6 +13,13 @@ app = FastAPI()
 
 app.include_router(start_agent.router, prefix="", tags=["Agent"])
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],          # any origin
+    allow_credentials=True,
+    allow_methods=["*"],          # any HTTP method
+    allow_headers=["*"],          # any headers
+)
 
 @app.get("/health")
 async def health():
