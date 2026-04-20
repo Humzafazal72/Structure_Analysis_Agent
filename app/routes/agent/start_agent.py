@@ -42,6 +42,7 @@ async def start_agent(structure_plan: UploadFile = File(...)):
             try:
                 async for event in graph_app.astream(input=initial_state, config=config):
                     for node_name, node_data in event.items():
+                        print(json.dumps(node_data))
                         serializable_data = {}
                         for key, value in node_data.items():
                             if hasattr(value, "model_dump"):
@@ -59,5 +60,5 @@ async def start_agent(structure_plan: UploadFile = File(...)):
         return EventSourceResponse(event_generator())
 
     except Exception as e:
-        logger.critical("Error: ")
+        logger.critical(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Something went wrong.")
