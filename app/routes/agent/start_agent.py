@@ -22,27 +22,32 @@ async def start_agent(structure_plan: UploadFile = File(...)):
         file_content = await structure_plan.read()
         file_obj = io.BytesIO(file_content)
         uploaded_file = await google_client_async.files.upload(
-                    file=file_obj,
-                    config={
-                        "mime_type": "application/pdf",
-                        "display_name": "user_upload.pdf",
-                    },
-                )
-
-        graph_app, cm = await get_graph()
-        config = {"configurable": {"thread_id": f"{project_id}"}}
-
+            file=file_obj,
+            config={
+                "mime_type": "application/pdf",
+                "display_name": "user_upload.pdf",
+            },
+        )
         initial_state = {
                 "file_uri": uploaded_file.uri,
                 "file_name": uploaded_file.name,
         }
-        print(initial_state)
+        # initial_state = {
+        #     "file_uri": "https://generativelanguage.googleapis.com/v1beta/files/akzkoj95anyv",
+        #     "file_name": "files/akzkoj95anyv",
+        # }
 
+        graph_app, cm = await get_graph()
+        config = {"configurable": {"thread_id": f"{project_id}"}}
+
+        
+        
         async def event_generator():
             try:
-                async for event in graph_app.astream(input=initial_state, config=config):
+                async for event in graph_app.astream(
+                    input=initial_state, config=config
+                ):
                     for node_name, node_data in event.items():
-                        print(json.dumps(node_data))
                         serializable_data = {}
                         for key, value in node_data.items():
                             if hasattr(value, "model_dump"):
@@ -55,7 +60,6 @@ async def start_agent(structure_plan: UploadFile = File(...)):
                         }
             finally:
                 await cm.__aexit__(None, None, None)
-
 
         return EventSourceResponse(event_generator())
 
