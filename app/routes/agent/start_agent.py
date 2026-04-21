@@ -58,6 +58,15 @@ async def start_agent(structure_plan: UploadFile = File(...)):
                             "event": node_name,
                             "data": json.dumps(serializable_data),
                         }
+            
+            except Exception as e:
+                # Catch the graph error here and stream it to the client
+                logger.error(f"Graph execution failed: {e}")
+                yield {
+                    "event": "error",
+                    "data": json.dumps({"detail": str(e)})
+                }
+
             finally:
                 await cm.__aexit__(None, None, None)
 
