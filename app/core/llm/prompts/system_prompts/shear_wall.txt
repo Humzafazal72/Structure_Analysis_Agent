@@ -80,7 +80,7 @@ Extract into the JSON schema. Key rules:
 ---
 
 <Additional Note>
-For each component list the uncertain variables in 'uncertain_areas'.
+If you are uncertain or unsure regarding the extracted value for a component, list the uncertain variable's name in 'uncertain_areas'.
 
 ## OUTPUT FORMAT
 

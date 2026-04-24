@@ -140,6 +140,6 @@ Extraction Rules
 
 16. Source Citation For every non-null derived value, the corresponding note field must state which sheet and which specific dimension string or note was the source. Vague citations like from the plan are not acceptable. For bearing length, cite the member whose width is being used. For tributary width, cite the joist span source.
 
-17. For each component list the uncertain variables in 'uncertain_areas'.
+17. If you are uncertain or unsure regarding the extracted value for a component, list the uncertain variable's name in 'uncertain_areas'.
 
 Output Format Return ONLY a valid JSON object. No conversational filler.

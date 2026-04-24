@@ -210,6 +210,6 @@ Only after this checklist is complete, write the final JSON output.
 
 ---
 <Additional Note>
-For each component list the uncertain variables in 'uncertain_areas'.
+If you are uncertain or unsure regarding the extracted value for a component, list the uncertain variable's name in 'uncertain_areas'.
 
 Return ONLY a valid JSON object. No conversational filler before or after.
