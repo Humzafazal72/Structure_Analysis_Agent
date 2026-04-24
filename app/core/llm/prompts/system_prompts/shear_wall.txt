@@ -79,78 +79,9 @@ Extract into the JSON schema. Key rules:
 
 ---
 
+<Additional Note>
+For each component list the uncertain variables in 'uncertain_areas'.
+
 ## OUTPUT FORMAT
 
 Return valid JSON matching this structure:
-
-```json
-{
-  "project_info": {
-    "address": "",
-    "seismic_design_category": "",
-    "sds": null,
-    "sd1": null,
-    "wind_speed_mph": null,
-    "stories": null,
-    "design_base_shear_kips": null
-  },
-  "braced_wall_lines": [
-    {
-      "bwl_id": "",
-      "direction": "X or Y",
-      "story_level": "",
-      "bwl_total_length_ft": null,
-      "total_braced_length_ft": null,
-      "braced_length_arithmetic": "",
-      "bwl_spacing_to_adjacent_ft": null,
-      "drag_strut_member": null,
-      "drag_strut_connector": null,
-      "bwl_note": ""
-    }
-  ],
-  "shear_walls": [
-    {
-      "sw_mark": "",
-      "bwl_id": "",
-      "story_level": "",
-      "system_type": "",
-      "pier_length_ft": null,
-      "wall_height_ft": null,
-      "aspect_ratio": null,
-      "sheathing_type": "",
-      "sheathing_thickness_in": null,
-      "sheathing_faces": "",
-      "blocking": "",
-      "edge_nail_spacing_in": null,
-      "field_nail_spacing_in": null,
-      "boundary_nail_spacing_in": null,
-      "nail_size": "",
-      "requires_3x_framing": false,
-      "stud_size": "",
-      "stud_spacing_in": null,
-      "holdown_model": "",
-      "holdown_anchor_rod": "",
-      "holdown_force_lbs": null,
-      "support_connector": "",
-      "anchor_bolt_dia_in": null,
-      "anchor_bolt_spacing_in": null,
-      "sill_plate_transfer": "",
-      "top_plate_transfer": "",
-      "tabulated_unit_shear_plf": null,
-      "sw_note": ""
-    }
-  ],
-  "diaphragms": [
-    {
-      "level": "",
-      "diaphragm_type": "",
-      "sheathing_type": "",
-      "sheathing_thickness_in": null,
-      "nailing_zones": [],
-      "chord_member": null,
-      "collector_lines": [],
-      "diaphragm_note": ""
-    }
-  ]
-}
-```

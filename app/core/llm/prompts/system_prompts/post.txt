@@ -272,50 +272,9 @@ Before writing the final JSON, run through this checklist in your reasoning:
 
 Only after this checklist is complete, write the final JSON output.
 
+<Additional Note>
+For each component list the uncertain variables in 'uncertain_areas'.
 ---
 
 Return ONLY a valid JSON object. No conversational filler before or after.
 
-```json
-{
-  "standalone_posts": [
-    {
-      "post_mark": "",
-      "existing_condition": false,
-      "new_load_applied": "",
-      "location_description": "",
-      "post_type": "solid | built_up | null",
-      "functional_type": "bearing | holdown | corner | intermediate_bearing | decorative | null",
-      "post_size": "",
-      "number_of_plies": null,
-      "species": "",
-      "grade": "",
-      "species_grade_note": "",
-      "height_ft": null,
-      "height_note": "",
-      "unbraced_length_ft": null,
-      "unbraced_length_note": "",
-      "bracing_condition": "",
-      "tributary_area_sf": null,
-      "tributary_area_note": "",
-      "point_load_lbs": null,
-      "point_load_note": "",
-      "roof_dead_load_psf": null,
-      "roof_live_load_psf": null,
-      "roof_snow_load_psf": null,
-      "floor_dead_load_psf": null,
-      "floor_live_load_psf": null,
-      "base_connector_model": "",
-      "base_bearing_surface": "concrete_footing | concrete_slab | wood_beam | steel_beam | grade | null",
-      "base_anchor_type": "cast_in | epoxy_set | bolt_through | null",
-      "base_anchor_fastener": "",
-      "top_connector_model": "",
-      "top_bearing_condition": "",
-      "holdown_model": "",
-      "holdown_anchor_rod": "",
-      "holdown_note": "",
-      "post_note": ""
-    }
-  ]
-}
-```

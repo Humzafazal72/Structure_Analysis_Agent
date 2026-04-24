@@ -2,16 +2,45 @@ import io
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
 
-SupportMaterial = Literal["DF-L", "SP", "SPF", "HF"]
+SupportMaterial = Literal[
+    "DF-L", "SP", "SPF", "HF", 
+    "concrete", "steel", 
+    "LVL", "PSL", "LSL"
+]
+
 class UncertainAreas(BaseModel):
     area_name: str
     variables: List[str]
+
+class LumberSpec(BaseModel):
+    species: Literal["DF-L", "SP", "SPF", "HF"] | None
+    grade: Literal["SS", "No.1", "No.2", "No.3", "Stud"] | None
+    species_grade_note: str
+
+# ------------------------- Global Project Data -----------------------
+class ProjectData(BaseModel):
+    address: str
+    stories: int | None
+    uncertain_areas: List[str] | None
+
+class WindLoadData(BaseModel):
+    wind_speed_mph: float | None
+    exposure_category: Literal["B", "C", "D"] | None
+    uncertain_areas: List[str] | None
+
+class SeismicLoadData(BaseModel):
+    seismic_design_category: str | None
+    sds: float | None
+    sd1: float | None
+    design_base_shear_kips: float | None
+    uncertain_areas: List[str] | None
 
  # --------------------------- Roof System ---------------------------
 class RoofRafter(BaseModel):
     zone: str
     size: str
     number_of_plies: int
+    lumber_spec: LumberSpec | None
     clear_span_ft: float | None
     clear_span_note: str
     overhang_in: float | None
@@ -25,11 +54,13 @@ class RoofRafter(BaseModel):
     roof_live_load_psf: float | None
     roof_snow_load_psf: float | None
     repetitive_member: bool | None
+    uncertain_areas: List[str] | None
 
 class CeilingJoist(BaseModel):
     zone: str
     size: str
     number_of_plies: int
+    lumber_spec: LumberSpec | None
     clear_span_ft: float | None
     clear_span_note: str
     available_support_bearing_in: float | None
@@ -38,15 +69,17 @@ class CeilingJoist(BaseModel):
     spacing_in: float | None
     ceiling_dead_load_psf: float | None
     attic_live_load_psf: float | None
+    attic_use: Literal["no_access", "limited_storage", "habitable"] | None
     repetitive_member: bool | None
+    uncertain_areas: List[str] | None
 
 class RidgeBeam(BaseModel):
     zone: str
     size: str
     number_of_plies: int
+    lumber_spec: LumberSpec | None
     clear_span_ft: float | None
     clear_span_note: str
-    roof_pitch: str | None
     available_support_bearing_in: float | None
     available_support_bearing_note: str
     support_material: SupportMaterial | None
@@ -55,12 +88,14 @@ class RidgeBeam(BaseModel):
     roof_dead_load_psf: float | None
     roof_live_load_psf: float | None
     roof_snow_load_psf: float | None
+    uncertain_areas: List[str] | None
 
 class HipValleyRafter(BaseModel):
     zone: str
     member_type: Literal["hip", "valley"]
     size: str
     number_of_plies: int
+    lumber_spec: LumberSpec | None
     clear_span_ft: float | None
     clear_span_note: str
     roof_pitch: str | None
@@ -72,13 +107,16 @@ class HipValleyRafter(BaseModel):
     roof_dead_load_psf: float | None
     roof_live_load_psf: float | None
     roof_snow_load_psf: float | None
+    uncertain_areas: List[str] | None
 
 class RoofDropBeam(BaseModel):
     zone: str
     size: str
     number_of_plies: int
+    lumber_spec: LumberSpec | None
     clear_span_ft: float | None
     clear_span_note: str
+    roof_pitch: str | None
     available_support_bearing_in: float | None
     available_support_bearing_note: str
     support_material: SupportMaterial | None
@@ -87,11 +125,13 @@ class RoofDropBeam(BaseModel):
     roof_dead_load_psf: float | None
     roof_live_load_psf: float | None
     roof_snow_load_psf: float | None
+    uncertain_areas: List[str] | None
 
 class RoofFlushBeam(BaseModel):
     zone: str
     size: str
     number_of_plies: int
+    lumber_spec: LumberSpec | None
     clear_span_ft: float | None
     clear_span_note: str
     available_support_bearing_in: float | None
@@ -99,12 +139,13 @@ class RoofFlushBeam(BaseModel):
     support_material: SupportMaterial | None
     hanger_bucket_seat_depth_in: float | None
     hanger_seat_depth_note: str
-    steel_hanger_carrier_material: str | None
+    hanger_carrier_material: str | None
     tributary_width_ft: float | None
     tributary_width_note: str
     roof_dead_load_psf: float | None
     roof_live_load_psf: float | None
     roof_snow_load_psf: float | None
+    uncertain_areas: List[str] | None
 
 class RoofSystemData(BaseModel):
     roof_rafters: List[RoofRafter]
@@ -120,20 +161,27 @@ class FloorJoist(BaseModel):
     zone: str
     size: str
     number_of_plies: int
+    lumber_spec: LumberSpec | None
     clear_span_ft: float | None
     clear_span_note: str | None
+    cantilever_ft: float | None
+    cantilever_note: str | None
     available_support_bearing_in: float | None
     available_support_bearing_note: str | None
     support_material: SupportMaterial | None
     spacing_in: float | None
-    dead_load_psf: float
-    floor_live_load_psf: float
+    dead_load_psf: float | None
+    dead_load_note: str | None
+    floor_live_load_psf: float | None
+    floor_live_load_note: str | None
     repetitive_member: bool | None
+    uncertain_areas: List[str] | None
 
 class FloorDropBeam(BaseModel):
     zone: str
     size: str
     number_of_plies: int
+    lumber_spec: LumberSpec | None
     clear_span_ft: float | None
     clear_span_note: str | None
     available_support_bearing_in: float | None
@@ -141,13 +189,17 @@ class FloorDropBeam(BaseModel):
     support_material: SupportMaterial | None
     tributary_width_ft: float | None
     tributary_width_note: str | None
-    dead_load_psf: float
-    floor_live_load_psf: float
+    dead_load_psf: float | None
+    dead_load_note: str | None
+    floor_live_load_psf: float | None
+    floor_live_load_note: str | None
+    uncertain_areas: List[str] | None
 
 class FloorFlushBeam(BaseModel):
     zone: str
     size: str
     number_of_plies: int
+    lumber_spec: LumberSpec | None
     clear_span_ft: float | None
     clear_span_note: str | None
     available_support_bearing_in: float | None
@@ -155,11 +207,14 @@ class FloorFlushBeam(BaseModel):
     support_material: SupportMaterial | None
     hanger_bucket_seat_depth_in: float | None
     hanger_seat_depth_note: str | None
-    steel_hanger_carrier_material: str | None
+    hanger_carrier_material: str | None
     tributary_width_ft: float | None
     tributary_width_note: str | None
-    dead_load_psf: float
-    floor_live_load_psf: float
+    dead_load_psf: float | None
+    dead_load_note: str | None
+    floor_live_load_psf: float | None
+    floor_live_load_note: str | None
+    uncertain_areas: List[str] | None
 
 class FloorSystemData(BaseModel):
     floor_joists: List[FloorJoist]
@@ -167,10 +222,8 @@ class FloorSystemData(BaseModel):
     floor_flush_beams: List[FloorFlushBeam]
     
 
-
 # ----------------------------- Footing -------------------------------
-class ProjectInfo(BaseModel):
-    address: str
+class FootingProjectInfo(BaseModel):
     concrete_fc_footings_psi: int | None
     concrete_fc_slab_psi: int | None
     rebar_grade: str
@@ -180,6 +233,7 @@ class ProjectInfo(BaseModel):
     frost_line_note: str
     soils_engineer_required: bool | None
     concrete_cover_to_soil_in: float | None
+    uncertain_areas: List[str] | None
 
 class ContinuousStripFooting(BaseModel):
     footing_mark: str
@@ -198,9 +252,10 @@ class ContinuousStripFooting(BaseModel):
     bottom_of_footing_below_grade_in: float | None
     embedment_note: str
     frost_compliance: str
-    rebar_size: int | None
-    rebar_count: int | None
-    rebar_spacing_in: float | None
+    longitudinal_rebar_size: int | None
+    longitudinal_rebar_count: int | None
+    transverse_rebar_size: int | None
+    transverse_rebar_spacing_in: float | None
     rebar_orientation: str | None
     rebar_faces: str | None
     rebar_lap_length_in: float | None
@@ -215,6 +270,7 @@ class ContinuousStripFooting(BaseModel):
     sill_plate_size: str
     sill_plate_treated: bool | None
     footing_note: str
+    uncertain_areas: List[str] | None
 
 class PadFooting(BaseModel):
     footing_mark: str
@@ -239,11 +295,8 @@ class PadFooting(BaseModel):
     post_base_model: str
     post_base_anchor_type: Literal["cast_in", "epoxy_set"] | None
     post_size: str
-    holdown_model: str
-    holdown_anchor_rod: str
-    holdown_embedment_in: float | None
-    holdown_installation_timing: str
     footing_note: str
+    uncertain_areas: List[str] | None
 
 class GradeBeam(BaseModel):
     footing_mark: str
@@ -251,6 +304,7 @@ class GradeBeam(BaseModel):
     new_load_applied: str
     location_description: str
     supported_element: str
+    bearing_on: Literal["soil", "piers", "piles"] | None
     width_in: float | None
     depth_in: float | None
     length_ft: float | None
@@ -265,13 +319,13 @@ class GradeBeam(BaseModel):
     rebar_lap_length_in: float | None
     concrete_cover_in: float | None
     footing_note: str
+    uncertain_areas: List[str] | None
 
 class SlabOnGrade(BaseModel):
     zone: str
     existing_condition: bool
     thickness_in: float | None
     thickness_note: str
-    concrete_fc_psi: int | None
     reinforcement_type: Literal["rebar", "wwf", "fiber", "none"] | None
     rebar_size: int | None
     rebar_spacing_in: float | None
@@ -283,6 +337,7 @@ class SlabOnGrade(BaseModel):
     control_joint_spacing_ft: float | None
     monolithic_with_footing: bool | None
     slab_note: str
+    uncertain_areas: List[str] | None
 
 class HoldownAnchor(BaseModel):
     holdown_model: str
@@ -292,9 +347,10 @@ class HoldownAnchor(BaseModel):
     supported_wall_mark: str
     installation_timing: str
     holdown_note: str
+    uncertain_areas: List[str] | None
 
 class FootingSystemData(BaseModel):
-    project_info: ProjectInfo
+    project_info: FootingProjectInfo
     continuous_strip_footings: List[ContinuousStripFooting]
     pad_footings: List[PadFooting]
     grade_beams: List[GradeBeam]
@@ -351,38 +407,32 @@ class StandalonePost(BaseModel):
     holdown_anchor_rod: str
     holdown_note: str
     post_note: str
+    uncertain_areas: List[str] | None
 
 class PostData(BaseModel):
     standalone_posts: List[StandalonePost]
 
 
 # ------------------------- ShearWall ---------------------------
-class ShearWallProjectInfo(BaseModel):
-    address: str
-    seismic_design_category: str
-    sds: float | None
-    sd1: float | None
-    wind_speed_mph: float | None
-    stories: int | None
-    design_base_shear_kips: float | None
-
 class BracedWallLine(BaseModel):
     bwl_id: str
     direction: Literal["X", "Y"] | None
     story_level: str
     bwl_total_length_ft: float | None
     total_braced_length_ft: float | None
-    braced_length_arithmetic: str
+    braced_panel_ids: List[str]
     bwl_spacing_to_adjacent_ft: float | None
     drag_strut_member: str | None
     drag_strut_connector: str | None
     bwl_note: str
+    uncertain_areas: List[str] | None
 
 class ShearWall(BaseModel):
     sw_mark: str
     bwl_id: str
     story_level: str
     system_type: str
+    framing_species: str | None
     pier_length_ft: float | None
     wall_height_ft: float | None
     aspect_ratio: float | None
@@ -407,19 +457,27 @@ class ShearWall(BaseModel):
     top_plate_transfer: str
     tabulated_unit_shear_plf: float | None
     sw_note: str
+    uncertain_areas: List[str] | None
+
+
+class NailingZone(BaseModel):
+    zone_label: str
+    nail_spacing_in: float | None
+    area_description: str
+    uncertain_areas: List[str]
 
 class Diaphragm(BaseModel):
     level: str
     diaphragm_type: str
     sheathing_type: str
     sheathing_thickness_in: float | None
-    nailing_zones: List[str]
+    nailing_zones: List[NailingZone]
     chord_member: str | None
     collector_lines: List[str]
     diaphragm_note: str
+    uncertain_areas: List[str] | None
 
 class ShearWallData(BaseModel):
-    project_info: ShearWallProjectInfo
     braced_wall_lines: List[BracedWallLine]
     shear_walls: List[ShearWall]
     diaphragms: List[Diaphragm]
@@ -431,6 +489,7 @@ class StudWall(BaseModel):
     wall_type: Literal["exterior_bearing", "interior_bearing", "non_bearing_partition", "shear_wall"]
     stud_size: str
     number_of_plies: int
+    lumber_spec: LumberSpec | None
     stud_height_ft: float | None
     stud_height_note: str
     spacing_in: float | None
@@ -445,23 +504,25 @@ class StudWall(BaseModel):
     braced_wall_panel: bool | None
     holdown_connector: str | None
     support_material: SupportMaterial | None
-    supported_loads_from_above: str | None
+    axial_load_lbs: float | None
+    axial_load_note: str | None
+    tributary_width_ft: float | None
     wall_dead_load_psf: float | None
-    wind_speed_mph: float | None
-    exposure_category: Literal["B", "C", "D"] | None
-    seismic_design_category: str | None
     repetitive_member: bool | None
     stud_note: str
+    uncertain_areas: List[str] | None
 
 class Header(BaseModel):
     zone: str
     opening_type: Literal["window", "door", "sliding_door", "garage_door", "pass_through", "other"]
     opening_mark: str | None
+    number_of_stories_above: int | None
     rough_opening_width_in: float | None
     rough_opening_height_in: float | None
     rough_opening_note: str
     header_size: str | None
     number_of_plies: int | None
+    lumber_spec: LumberSpec | None
     header_clear_span_ft: float | None
     header_clear_span_note: str
     bearing_wall: bool
@@ -479,6 +540,7 @@ class Header(BaseModel):
     floor_live_load_psf: float | None
     roof_load_on_header_psf: float | None
     header_note: str
+    uncertain_areas: List[str] | None
 
 class TopPlate(BaseModel):
     zone: str
@@ -487,6 +549,7 @@ class TopPlate(BaseModel):
     support_material: SupportMaterial | None
     splice_connector: str | None
     plate_note: str
+    uncertain_areas: List[str] | None
 
 class BottomPlate(BaseModel):
     zone: str
@@ -495,6 +558,7 @@ class BottomPlate(BaseModel):
     support_material: SupportMaterial | None
     anchor_bolt_spacing_in: float | None
     plate_note: str
+    uncertain_areas: List[str] | None
 
 class WallSystemData(BaseModel):
     stud_walls: List[StudWall]
@@ -506,6 +570,13 @@ class WallSystemData(BaseModel):
 class AgentState(BaseModel):
     file_uri: Optional[str] = None
     file_name: Optional[str] = None
+    
+    # Global Load / Project Data
+    # project_data: Optional[ProjectData] = None
+    # wind_load_data: Optional[WindLoadData] = None
+    # seismic_load_data: Optional[SeismicLoadData] = None
+    
+    # Systems
     roof_system: Optional[RoofSystemData] = None
     floor_system: Optional[FloorSystemData] = None
     footing: Optional[FootingSystemData] = None
