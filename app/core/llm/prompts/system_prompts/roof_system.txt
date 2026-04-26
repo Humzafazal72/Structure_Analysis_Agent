@@ -13,7 +13,7 @@ Before writing a single JSON field, complete the following steps in your interna
 3. **Identify the primary framing sheet(s)** — these are your main source. All other non-MEP sheets are cross-reference sources.
 4. **Locate and record** the following before any extraction:
    - Lumber species/grade general note (e.g., "All framing DF-L No.2 unless noted")
-   - Any design load statement (dead load, live load, snow load psf)
+   - Any design load statement (dead load)
    - Drawing scale for each sheet you will use
    - Any roof pitch callout (slope triangles, slope annotations, ratio labels) — on any sheet
    - Any overhang dimension (eave details, section cuts, roof plan annotations)
@@ -118,14 +118,12 @@ Pitch applies to rafters, hip/valley rafters, and ridge beams.
 
 1. Search every non-MEP sheet for a structural load schedule, general notes section, or title block entry specifying:
    - Roof dead load (psf)
-   - Roof live load (psf) — used in non-snow jurisdictions
-   - Ground or roof snow load (psf) — used in snow jurisdictions; mutually exclusive with roof live load
    - Ceiling dead load (psf) — for ceiling joists
    - Attic live load (psf) — for ceiling joists where attic storage or habitable attic is indicated
 2. If a value is found, record the sheet and exact note string as the source.
 3. If no load values are found on any sheet after checking all of them, return `null` for all load fields and note: "No design load schedule or load-specifying general note found on any non-MEP sheet."
 
-**Reasoning gate**: Do not assume default code loads (e.g., 20 psf live, 15 psf dead). Only populate load fields from explicit plan evidence. Returning null is correct and expected when loads are not shown.
+**Reasoning gate**: Returning null is correct and expected when loads are not shown.
 
 ---
 
@@ -135,26 +133,19 @@ Pitch applies to rafters, hip/valley rafters, and ridge beams.
 
 **Rule 2 — Units**: Span in decimal feet (ft). Bearing length, spacing, and overhang in inches (in). Pitch as X:12.
 
-**Rule 3 — Repetitive Member**:
-- `true` if spacing ≤ 24"
-- `false` if spacing > 24"
-- `null` if `spacing_in` is null — never infer without confirmed spacing
+**Rule 3 — Number of Plies**: Default to 1 if not specified. If written as "2-2x10", plies = 2.
 
-**Rule 4 — Number of Plies**: Default to 1 if not specified. If written as "2-2x10", plies = 2.
+**Rule 4 — Span Splitting**: Every unique combination of (size + clear span + zone/region) is a separate object. A single callout may represent multiple physical segments — count each one. Perimeter and interior beam segments are always separate entries even at equal spans, because tributary widths differ. For rafters and ceiling joists, also split on spacing differences.
 
-**Rule 5 — Span Splitting**: Every unique combination of (size + clear span + zone/region) is a separate object. A single callout may represent multiple physical segments — count each one. Perimeter and interior beam segments are always separate entries even at equal spans, because tributary widths differ. For rafters and ceiling joists, also split on spacing differences.
+**Rule 5 — Zone Label**: Every entry must have a zone field — a short descriptive label of the physical location (e.g., "New addition south slope rafters", "Main ridge beam — west segment"). Mandatory even when two entries share the same size. For beams, include orientation and position.
 
-**Rule 6 — Zone Label**: Every entry must have a zone field — a short descriptive label of the physical location (e.g., "New addition south slope rafters", "Main ridge beam — west segment"). Mandatory even when two entries share the same size. For beams, include orientation and position.
+**Rule 6 — Spanning Direction in Note**: Every `clear_span_note` must begin by stating the member's confirmed spanning direction (derived from elevation cross-check per Phase 2 procedure) and naming both support faces, before describing the span computation. Example opening: "Spanning direction confirmed from A-106 North/South elevations showing gable peaks: rafters run East-West, bearing on west exterior wall top plate at eave and 2x8 ridge board at peak."
 
-**Rule 7 — Spanning Direction in Note**: Every `clear_span_note` must begin by stating the member's confirmed spanning direction (derived from elevation cross-check per Phase 2 procedure) and naming both support faces, before describing the span computation. Example opening: "Spanning direction confirmed from A-106 North/South elevations showing gable peaks: rafters run East-West, bearing on west exterior wall top plate at eave and 2x8 ridge board at peak."
+**Rule 7 — Material**: Apply the general lumber note uniformly to all members unless a specific member has its own overriding callout. Never assign a species without explicit plan evidence. Classify as DF-L, SP, SPF, or HF only.
 
-**Rule 8 — Material**: Apply the general lumber note uniformly to all members unless a specific member has its own overriding callout. Never assign a species without explicit plan evidence. Classify as DF-L, SP, SPF, or HF only.
+**Rule 8 — No Overhangs Except Rafters**: Ceiling joists, ridge beams, hip/valley rafters, drop beams, and flush beams do not have overhang fields.
 
-**Rule 9 — No Overhangs Except Rafters**: Ceiling joists, ridge beams, hip/valley rafters, drop beams, and flush beams do not have overhang fields.
-
-**Rule 10 — Member Classification**:
-- **Rafter**: repetitive sloped framing member; solid lines; spacing callout present; bears on top plate at eave and on ridge board or ridge beam at peak.
-- **Ceiling Joist**: repetitive horizontal member tying rafter feet or carrying ceiling; solid parallel lines; callout typically reads "C.J." Never omit ceiling joists if they appear on any sheet.
+**Rule 9 — Member Classification**:
 - **Ridge Beam (structural)**: bold/thick solid line along the ridge; carries rafter loads; rafters bear on top of or into it via hangers. Extract only if the plan or detail confirms structural capacity (e.g., a sized member like "(3)2x12 Ridge Beam").
 - **Ridge Board (non-structural)**: labeled "ridge board" or shown as a thin nailer without a structural size callout. Do NOT extract as a ridge beam. Note its presence as non-structural in your Phase 2 reasoning but do not create a JSON entry for it.
 - **Hip Rafter**: diagonal rafter from a wall corner to the ridge point of a hip roof. Bold diagonal line on roof plan.
@@ -203,10 +194,17 @@ Before writing the final JSON, run through this checklist in your reasoning:
 - [ ] Does every span make physical sense relative to the building dimensions in the rafter's confirmed spanning direction?
 - [ ] Did I apply the lumber species note consistently to all members?
 - [ ] Are load fields null only because no load values were found on any sheet, not because I forgot to check?
-- [ ] Is `repetitive_member` null for every member where `spacing_in` is null?
 - [ ] Did I cite a specific sheet and dimension string for every non-null derived value?
 
 Only after this checklist is complete, write the final JSON output.
+
+## Phase 8 - Default fields
+Some fields have default values or values that will be calculated later, you don't need to extract these. You can just output those default values or None:
+- For all components, roof_live_load_psf has default value 20.0 and roof_snow_load_psf will be calculated later so set it's value to None.
+- 'repetitive_member' is always true
+- For Service conditions, Use default values for moisture_condition("dry"), temperate_range("lte_100F"), incised(False). Only override the default values for for unusual conditions (crawlspaces, hot attics, treated lumber).
+- For Deflection criteria, live_load_limit("L/360") and total_load_limit("L/240") use deafult values. cantilever_limit will be calculated later so for it return None.
+- For ewp_specs, extract only if EWP called out on plans. Also, set to Fb_psi, Fv_psi, Fc_perp_psi, E_psi and E_min_psi to null as they will be calculated later
 
 ---
 <Additional Note>

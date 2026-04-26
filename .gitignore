@@ -7,3 +7,5 @@ __pycache__/
 test.py
 app/storage/
 frontend/
+
+schemav2.py

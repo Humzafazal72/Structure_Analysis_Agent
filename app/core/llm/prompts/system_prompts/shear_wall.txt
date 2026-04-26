@@ -77,6 +77,11 @@ Extract into the JSON schema. Key rules:
 - **Holdown anchor rod**: from the holdown schedule (e.g., HDU2→SSTB16, HDU4→SSTB24). Record both the holdown device and its anchor rod.
 - Null any field not found on plans. Do not guess or interpolate.
 
+## Phase 4 - Default fields
+Some fields have default values or values that will be calculated later, you don't need to extract these. You can just output those default values or None:
+- For the ShearWall, Set tabulated_unit_shear_plf, holdown_force_lbs, requires_3x_framing and aspect_ratio will be determined later so use null.
+
+
 ---
 
 <Additional Note>

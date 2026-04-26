@@ -208,6 +208,13 @@ Before writing the final JSON, run through this checklist in your reasoning:
 
 Only after this checklist is complete, write the final JSON output.
 
+## Phase 8 - Default fields
+Some fields have default values or values that will be calculated later, you don't need to extract these. You can just output those default values or None:
+- axial_load_lbs and lateral_wind_load_psf will be calculated later so set them to null
+- 'repetitive_member' is always true
+- For Service conditions, Use default values for moisture_condition("dry"), temperate_range("lte_100F"), incised(False). Only override the default values for for unusual conditions (crawlspaces, hot attics, treated lumber).
+- For Deflection criteria, live_load_limit("L/360") and total_load_limit("L/240") use deafult values. cantilever_limit will be calculated later so for it return null.
+- For ewp_specs, extract only if EWP called out on plans. Also, set to Fb_psi, Fv_psi, Fc_perp_psi, E_psi and E_min_psi to null as they will be calculated later
 <Additional Note>
 If you are uncertain or unsure regarding the extracted value for a component, list the uncertain variable's name in 'uncertain_areas'.
 

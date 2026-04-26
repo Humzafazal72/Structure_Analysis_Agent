@@ -188,9 +188,6 @@ For each footing, extract reinforcement in this exact order of priority:
 - `rebar_size`: bar designation (e.g., "#4", "#5")
 - `rebar_count`: number of longitudinal bars — null if bars are specified by spacing, not count
 - `rebar_spacing_in`: spacing in inches for mat/grid rebar — null if specified by count
-- `rebar_orientation`: "longitudinal," "transverse," "EW" (each way)
-- `rebar_faces`: "top," "bottom," or "top and bottom" — if only bottom bars are called out, record "bottom" and add note: "Top bar condition not called out on any sheet."
-- `rebar_lap_length_in`: from structural general notes (e.g., "#5 OR SMALLER — 30"")
 - `concrete_cover_in`: from general notes or detail
 - **Existing footings**: return null for all rebar fields unless the plans provide existing rebar data. Note: "Existing footing — rebar unknown."
 - Never assume a default reinforcement size — return null with explanation
@@ -295,12 +292,18 @@ Before writing the final JSON, run through this checklist in your reasoning:
 - [ ] Did I extract anchor bolt data from foundation notes AND verify against project-specific details?
 - [ ] Did I correctly separate holdown anchors from post bases?
 - [ ] Is slab-on-grade extracted separately from continuous footings?
-- [ ] Did I record `rebar_faces` for footing rebar and note top bar absence if only bottom bars are called out?
 - [ ] Did I resolve any slab thickness conflicts between sheets and state the governing sheet and reason?
 - [ ] Did I cite a specific sheet and exact string for every non-null derived value?
 - [ ] Did I confirm that existing footings receiving new loads are flagged with `new_load_applied`?
 
 Only after this checklist is complete, write the final JSON output.
+
+## Phase 9 - Default fields
+Some fields have default values or values that will be calculated later, you don't need to extract these. You can just output those default values or None:
+- For Footing Project Info, set rebar_grade to "Grade 60" and concrete_cover_to_soil_in to 3.0 by default. Extract concrete_fc_footings_psi and concrete_fc_slab_psi if visible, or else just use deafault values i.e. 2500.
+- rebar_lap_length_in, rebar_orientation and rebar_faces will be calculated later, so set them to null. concrete_cover_in will always have the default value 3.0.
+- For ContinuousStripFooting, anchor_bolt_corner_spacing_in(12.0), sill_plate_treated(True) and anchor_bolt_end_of_plate_max_in(12.0) will use default values.
+- For SlabOnGrade, vapor_barrier_mils will use default value i.e. 10 and control_joint_spacing_ft will be calculated later
 
 ---
 <Additional Note>
