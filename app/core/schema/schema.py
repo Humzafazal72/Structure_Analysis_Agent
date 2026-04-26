@@ -40,46 +40,6 @@ class LumberSpec(BaseModel):
     grade: Literal["SS", "No.1", "No.2", "No.3", "Stud"] | None = None
     species_grade_note: str
 
-
-class EWPSpec(BaseModel):
-    """Engineered Wood Product — only populate when plans explicitly call out an EWP member."""
-    product_type: Literal["LVL", "PSL", "LSL", "glulam", "I-joist"] | None = None
-    manufacturer: str | None = None                      # EXTRACT_IF_VISIBLE: often on plan callouts
-    product_series: str | None = None                     # EXTRACT_IF_VISIBLE: e.g. "Microllam 2.0E"
-    Fb_psi: float | None = None                          # SKIP_EXTRACTION: calc engine looks up from product tables | default: None
-    Fv_psi: float | None = None                          # SKIP_EXTRACTION: calc engine looks up | default: None
-    Fc_perp_psi: float | None = None                     # SKIP_EXTRACTION: calc engine looks up | default: None
-    E_psi: float | None = None                           # SKIP_EXTRACTION: calc engine looks up | default: None
-    E_min_psi: float | None = None                       # SKIP_EXTRACTION: calc engine looks up | default: None
-    ewp_note: str | None = None
-
-
-class ServiceConditions(BaseModel):
-    """
-    NDS adjustment factor inputs.
-    Most light-frame residential is dry/≤100°F/not incised → all defaults below.
-    AI extractor should SKIP this entire sub-model. Calc engine applies defaults.
-    Engineer overrides in HITL only for unusual conditions (crawlspaces, hot attics, treated lumber).
-    """
-    moisture_condition: Literal["dry", "wet"] = "dry"                          # SKIP_EXTRACTION | default: "dry"
-    temperature_range: Literal["lte_100F", "100_125F", "125_150F"] = "lte_100F"  # SKIP_EXTRACTION | default: "lte_100F"
-    incised: bool = False                                                       # SKIP_EXTRACTION | default: False
-    pressure_treated: bool = False                                              # EXTRACT_IF_VISIBLE: check sill plates, outdoor posts
-    service_note: str | None = None
-
-
-class DeflectionCriteria(BaseModel):
-    """
-    Deflection limits. Almost never shown on drawings — code-driven defaults.
-    Calc engine sets from IBC Table 1604.3. Engineer overrides in HITL if needed.
-    """
-    live_load_limit: str = "L/360"       # SKIP_EXTRACTION | default: "L/360" (floor), "L/240" (roof)
-    total_load_limit: str = "L/240"      # SKIP_EXTRACTION | default: "L/240" (floor), "L/180" (roof)
-    cantilever_limit: str | None = None  # SKIP_EXTRACTION | default: calc engine sets "L/180" if cantilever exists
-    custom_absolute_limit_in: float | None = None
-    deflection_note: str | None = None
-
-
 class MemberSize(BaseModel):
     """Parsed member size. AI extracts size_label string, calc engine parses to dimensions."""
     size_label: str | None = None               # EXTRACT: "2x10", "3-1/2 x 11-7/8", "LVL 1-3/4x14"
@@ -261,9 +221,6 @@ class RoofRafter(BaseModel):
     size: str                                     # EXTRACT: "2x8", "2x10" etc.
     number_of_plies: int = 1
     lumber_spec: LumberSpec | None = None
-    ewp_spec: EWPSpec | None = None               # EXTRACT_IF_VISIBLE: only if EWP called out on plans
-    service_conditions: ServiceConditions = Field(default_factory=ServiceConditions)  # SKIP_EXTRACTION: use defaults
-    deflection_criteria: DeflectionCriteria = Field(default_factory=lambda: DeflectionCriteria(live_load_limit="L/240", total_load_limit="L/180"))  # SKIP_EXTRACTION: roof defaults
     clear_span_ft: float | None = None
     clear_span_note: str = ""
     overhang_in: float | None = None
@@ -285,8 +242,6 @@ class CeilingJoist(BaseModel):
     size: str
     number_of_plies: int = 1
     lumber_spec: LumberSpec | None = None
-    service_conditions: ServiceConditions = Field(default_factory=ServiceConditions)  # SKIP_EXTRACTION
-    deflection_criteria: DeflectionCriteria = Field(default_factory=lambda: DeflectionCriteria(live_load_limit="L/360", total_load_limit="L/240"))  # SKIP_EXTRACTION
     clear_span_ft: float | None = None
     clear_span_note: str = ""
     available_support_bearing_in: float | None = None
@@ -305,9 +260,6 @@ class RidgeBeam(BaseModel):
     size: str
     number_of_plies: int
     lumber_spec: LumberSpec | None = None
-    ewp_spec: EWPSpec | None = None
-    service_conditions: ServiceConditions = Field(default_factory=ServiceConditions)  # SKIP_EXTRACTION
-    deflection_criteria: DeflectionCriteria = Field(default_factory=lambda: DeflectionCriteria(live_load_limit="L/240", total_load_limit="L/180"))  # SKIP_EXTRACTION
     clear_span_ft: float | None = None
     clear_span_note: str = ""
     available_support_bearing_in: float | None = None
@@ -327,9 +279,6 @@ class HipValleyRafter(BaseModel):
     size: str
     number_of_plies: int
     lumber_spec: LumberSpec | None = None
-    ewp_spec: EWPSpec | None = None
-    service_conditions: ServiceConditions = Field(default_factory=ServiceConditions)  # SKIP_EXTRACTION
-    deflection_criteria: DeflectionCriteria = Field(default_factory=lambda: DeflectionCriteria(live_load_limit="L/240", total_load_limit="L/180"))  # SKIP_EXTRACTION
     clear_span_ft: float | None = None
     clear_span_note: str = ""
     roof_pitch: str | None = None
@@ -349,9 +298,6 @@ class RoofDropBeam(BaseModel):
     size: str
     number_of_plies: int
     lumber_spec: LumberSpec | None = None
-    ewp_spec: EWPSpec | None = None
-    service_conditions: ServiceConditions = Field(default_factory=ServiceConditions)  # SKIP_EXTRACTION
-    deflection_criteria: DeflectionCriteria = Field(default_factory=lambda: DeflectionCriteria(live_load_limit="L/240", total_load_limit="L/180"))  # SKIP_EXTRACTION
     clear_span_ft: float | None = None
     clear_span_note: str = ""
     roof_pitch: str | None = None
@@ -371,9 +317,6 @@ class RoofFlushBeam(BaseModel):
     size: str
     number_of_plies: int
     lumber_spec: LumberSpec | None = None
-    ewp_spec: EWPSpec | None = None
-    service_conditions: ServiceConditions = Field(default_factory=ServiceConditions)  # SKIP_EXTRACTION
-    deflection_criteria: DeflectionCriteria = Field(default_factory=lambda: DeflectionCriteria(live_load_limit="L/240", total_load_limit="L/180"))  # SKIP_EXTRACTION
     clear_span_ft: float | None = None
     clear_span_note: str = ""
     available_support_bearing_in: float | None = None
@@ -406,9 +349,6 @@ class FloorJoist(BaseModel):
     size: str
     number_of_plies: int = 1
     lumber_spec: LumberSpec | None = None
-    ewp_spec: EWPSpec | None = None
-    service_conditions: ServiceConditions = Field(default_factory=ServiceConditions)  # SKIP_EXTRACTION
-    deflection_criteria: DeflectionCriteria = Field(default_factory=DeflectionCriteria)  # SKIP_EXTRACTION: L/360 LL, L/240 TL
     clear_span_ft: float | None = None
     clear_span_note: str | None = ""
     cantilever_ft: float | None = None
@@ -430,9 +370,6 @@ class FloorDropBeam(BaseModel):
     size: str
     number_of_plies: int
     lumber_spec: LumberSpec | None = None
-    ewp_spec: EWPSpec | None = None
-    service_conditions: ServiceConditions = Field(default_factory=ServiceConditions)  # SKIP_EXTRACTION
-    deflection_criteria: DeflectionCriteria = Field(default_factory=DeflectionCriteria)  # SKIP_EXTRACTION
     clear_span_ft: float | None = None
     clear_span_note: str | None = ""
     available_support_bearing_in: float | None = None
@@ -452,9 +389,6 @@ class FloorFlushBeam(BaseModel):
     size: str
     number_of_plies: int
     lumber_spec: LumberSpec | None = None
-    ewp_spec: EWPSpec | None = None
-    service_conditions: ServiceConditions = Field(default_factory=ServiceConditions)  # SKIP_EXTRACTION
-    deflection_criteria: DeflectionCriteria = Field(default_factory=DeflectionCriteria)  # SKIP_EXTRACTION
     clear_span_ft: float | None = None
     clear_span_note: str | None = ""
     available_support_bearing_in: float | None = None
@@ -637,7 +571,6 @@ class StandalonePost(BaseModel):
     species: str = ""
     grade: str = ""
     species_grade_note: str = ""
-    service_conditions: ServiceConditions = Field(default_factory=ServiceConditions)  # SKIP_EXTRACTION
     height_ft: float | None = None
     height_note: str = ""
     unbraced_length_ft: float | None = None
@@ -755,7 +688,6 @@ class StudWall(BaseModel):
     stud_size: str                                # EXTRACT: "2x4", "2x6"
     number_of_plies: int = 1
     lumber_spec: LumberSpec | None = None
-    service_conditions: ServiceConditions = Field(default_factory=ServiceConditions)  # SKIP_EXTRACTION
     stud_height_ft: float | None = None
     stud_height_note: str = ""
     spacing_in: float = 16.0                      # EXTRACT_IF_VISIBLE | default: 16" o.c.
@@ -791,9 +723,6 @@ class Header(BaseModel):
     header_size: str | None = None                       # EXTRACT: "2x12", "4x12", etc.
     number_of_plies: int | None = None
     lumber_spec: LumberSpec | None = None
-    ewp_spec: EWPSpec | None = None
-    service_conditions: ServiceConditions = Field(default_factory=ServiceConditions)  # SKIP_EXTRACTION
-    deflection_criteria: DeflectionCriteria = Field(default_factory=DeflectionCriteria)  # SKIP_EXTRACTION
     header_clear_span_ft: float | None = None
     header_clear_span_note: str = ""
     bearing_wall: bool = True

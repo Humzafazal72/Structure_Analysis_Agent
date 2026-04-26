@@ -144,10 +144,6 @@ Extraction Rules
    Some fields have default values or values that will be calculated later, you don't need to extract these. You can just output those default values or None:
    - For all components, floor_live_load_psf has default value 540.0.
    - 'repetitive_member' is always true
-   - For Service conditions, Use default values for moisture_condition("dry"), temperate_range("lte_100F"), incised(False). Only override the default values for for unusual conditions (crawlspaces, hot attics, treated lumber).
-   - For Deflection criteria, live_load_limit("L/360") and total_load_limit("L/240") use deafult values. cantilever_limit will be calculated later so for it return None.
-   - For ewp_specs, extract only if EWP called out on plans. Also, set to Fb_psi, Fv_psi, Fc_perp_psi, E_psi and E_min_psi to null as they will be calculated later
-
 
 
 18. If you are uncertain or unsure regarding the extracted value for a component, list the uncertain variable's name in 'uncertain_areas'.

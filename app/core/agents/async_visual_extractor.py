@@ -27,7 +27,7 @@ logger = get_logger(__name__)
 
 
 async def visual_extractor(agent_state: AgentState):
-    try:
+    #try:
         floor_config = types.GenerateContentConfig(
             system_instruction=SYS_PROMPT_FLOOR,
             response_schema=FloorSystemData,
@@ -60,19 +60,27 @@ async def visual_extractor(agent_state: AgentState):
         )
 
         file_uri = agent_state.file_uri
-        tasks = [
-            fetch_with_id(call_id="floor", config=floor_config, file_uri=file_uri),
-            fetch_with_id(call_id="footing", config=footing_config, file_uri=file_uri),
-            fetch_with_id(call_id="post", config=post_config, file_uri=file_uri),
-            fetch_with_id(call_id="roof", config=roof_config, file_uri=file_uri),
-            fetch_with_id(call_id="shear_wall", config=shear_wall_config, file_uri=file_uri),
-            fetch_with_id(call_id="wall", config=wall_config, file_uri=file_uri),
+        configs = [
+            ("floor", floor_config),
+            ("footing", footing_config),
+            ("post", post_config),
+            ("roof", roof_config),
+            ("shear_wall", shear_wall_config),
+            ("wall", wall_config)
         ]
 
+        tasks = []
+
+        # Launch tasks with a slight stagger to prevent the 400 error
+        for call_id, config in configs:
+            tasks.append(fetch_with_id(call_id=call_id, config=config, file_uri=file_uri))
+            await asyncio.sleep(1) # <--- Critical: Give the backend 1 second to breathe
+
         parsed_data = {}
+
         for task in asyncio.as_completed(tasks):
             call_id, data = await task
-            parsed_data[f"{call_id}"] = data
+            parsed_data[call_id] = data
             logger.info(f"Finished {call_id}")
 
         return {
@@ -84,10 +92,10 @@ async def visual_extractor(agent_state: AgentState):
             "shear_wall": parsed_data["shear_wall"].model_dump(),
         }
     
-    except ClientError as e:
-        logger.error(f"Google API Client Error: {e.message}")
-        raise Exception("AI Quota exceeded or invalid request.")
+    # except ClientError as e:
+    #     logger.error(f"Google API Client Error: {e.message}")
+    #     raise Exception("AI Quota exceeded or invalid request.")
 
-    except Exception as e:
-        logger.critical("Error: ", e)
-        raise Exception("Something went Wrong while extracting data from document")
+    # except Exception as e:
+    #     logger.critical("Error: ", e)
+    #     raise Exception("Something went Wrong while extracting data from document")

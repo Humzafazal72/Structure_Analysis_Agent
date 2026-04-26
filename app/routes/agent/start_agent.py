@@ -1,6 +1,8 @@
-import io
+import os
 import json
 import random
+import asyncio
+import tempfile
 from fastapi import UploadFile, Form, File
 from fastapi import APIRouter, HTTPException
 from sse_starlette import EventSourceResponse
@@ -8,40 +10,54 @@ from sse_starlette import EventSourceResponse
 from services import get_logger
 from core.llm.clients import google_client_async
 from services import get_graph
-from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
 router = APIRouter()
 
 logger = get_logger(__name__)
 
-
 @router.post("/api/start_agent")
 async def start_agent(structure_plan: UploadFile = File(...)):
+    project_id = random.randint(0, 10000) - random.randint(0, 999)
+    
+    # 1. Read the incoming file content
+    file_content = await structure_plan.read()
+    
+    # 2. Write to a temporary physical file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+        temp_file.write(file_content)
+        temp_file_path = temp_file.name
+
     try:
-        project_id = random.randint(0, 10000) - random.randint(0, 999)
-        file_content = await structure_plan.read()
-        file_obj = io.BytesIO(file_content)
         uploaded_file = await google_client_async.files.upload(
-            file=file_obj,
+            file=temp_file_path,
             config={
                 "mime_type": "application/pdf",
                 "display_name": "user_upload.pdf",
             },
         )
+        # 3. Pass the physical file path to the SDK
+        file_info = await google_client_async.files.get(name=uploaded_file.name)
+        
+        # Keep checking the state every 2 seconds
+        while file_info.state.name == "PROCESSING":
+            logger.info(f"File {uploaded_file.name} is processing. Waiting 2 seconds...")
+            await asyncio.sleep(2)
+            file_info = await google_client_async.files.get(name=uploaded_file.name)
+            
+        # If the backend failed to parse the PDF, abort
+        if file_info.state.name == "FAILED":
+            raise HTTPException(status_code=400, detail="Google API failed to process the PDF.")
+        # ---------------------------------------------------------
+
+        # Now it is safe to pass the URI to the agent
         initial_state = {
-                "file_uri": uploaded_file.uri,
-                "file_name": uploaded_file.name,
+            "file_uri": uploaded_file.uri,
+            "file_name": uploaded_file.name,
         }
-        # initial_state = {
-        #     "file_uri": "https://generativelanguage.googleapis.com/v1beta/files/akzkoj95anyv",
-        #     "file_name": "files/akzkoj95anyv",
-        # }
 
         graph_app, cm = await get_graph()
         config = {"configurable": {"thread_id": f"{project_id}"}}
 
-        
-        
         async def event_generator():
             try:
                 async for event in graph_app.astream(
@@ -60,7 +76,6 @@ async def start_agent(structure_plan: UploadFile = File(...)):
                         }
             
             except Exception as e:
-                # Catch the graph error here and stream it to the client
                 logger.error(f"Graph execution failed: {e}")
                 yield {
                     "event": "error",
@@ -72,6 +87,7 @@ async def start_agent(structure_plan: UploadFile = File(...)):
 
         return EventSourceResponse(event_generator())
 
-    except Exception as e:
-        logger.critical(f"Error: {e}")
-        raise HTTPException(status_code=500, detail="Something went wrong.")
+    finally:
+        # 4. Ensure the temp file is cleaned up no matter what happens
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
