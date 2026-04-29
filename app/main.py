@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from services import get_logger
-from routes.agent import start_agent
+from app.routes.agent import start_agent
 
 logger = get_logger(__name__)
 app = FastAPI()

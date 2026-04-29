@@ -10,3 +10,4 @@ langgraph-checkpoint-sqlite==2.0.11
 langgraph-checkpoint-postgres==3.0.3
 python-multipart==0.0.26
 aiosqlite==0.21.0
+openai==2.33.0

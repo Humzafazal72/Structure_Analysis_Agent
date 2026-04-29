@@ -148,4 +148,82 @@ Extraction Rules
 
 18. If you are uncertain or unsure regarding the extracted value for a component, list the uncertain variable's name in 'uncertain_areas'.
 
-Output Format Return ONLY a valid JSON object. No conversational filler.
+Output Format Return ONLY a valid JSON object as shown below. No conversational filler.
+
+SupportMaterial = Literal[
+    "DF-L", "SP", "SPF", "HF",
+    "concrete", "steel",
+    "LVL", "PSL", "LSL", "glulam"
+]
+
+class LumberSpec(BaseModel):
+    species: Literal["DF-L", "SP", "SPF", "HF"] | None = None
+    grade: Literal["SS", "No.1", "No.2", "No.3", "Stud"] | None = None
+    species_grade_note: str
+
+class FloorJoist(BaseModel):
+    zone: str
+    size: str
+    number_of_plies: int = 1
+    lumber_spec: LumberSpec | None = None
+    clear_span_ft: float | None = None
+    clear_span_note: str | None = ""
+    cantilever_ft: float | None = None
+    cantilever_note: str | None = None
+    available_support_bearing_in: float | None = None
+    available_support_bearing_note: str | None = ""
+    support_material: SupportMaterial | None = None
+    spacing_in: float | None = None
+    dead_load_psf: float | None = None
+    dead_load_note: str | None = None
+    floor_live_load_psf: float = 40.0             
+    floor_live_load_note: str | None = None
+    repetitive_member: bool = True                
+    uncertain_areas: List[str] | None = None
+
+
+class FloorDropBeam(BaseModel):
+    zone: str
+    size: str
+    number_of_plies: int
+    lumber_spec: LumberSpec | None = None
+    clear_span_ft: float | None = None
+    clear_span_note: str | None = ""
+    available_support_bearing_in: float | None = None
+    available_support_bearing_note: str | None = ""
+    support_material: SupportMaterial | None = None
+    tributary_width_ft: float | None = None
+    tributary_width_note: str | None = ""
+    dead_load_psf: float | None = None
+    dead_load_note: str | None = None
+    floor_live_load_psf: float = 40.0             
+    floor_live_load_note: str | None = None
+    uncertain_areas: List[str] | None = None
+
+
+class FloorFlushBeam(BaseModel):
+    zone: str
+    size: str
+    number_of_plies: int
+    lumber_spec: LumberSpec | None = None
+    clear_span_ft: float | None = None
+    clear_span_note: str | None = ""
+    available_support_bearing_in: float | None = None
+    available_support_bearing_note: str | None = ""
+    support_material: SupportMaterial | None = None
+    hanger_bucket_seat_depth_in: float | None = None
+    hanger_seat_depth_note: str | None = ""
+    hanger_carrier_material: str | None = None
+    tributary_width_ft: float | None = None
+    tributary_width_note: str | None = ""
+    dead_load_psf: float | None = None
+    dead_load_note: str | None = None
+    floor_live_load_psf: float = 40.0             
+    floor_live_load_note: str | None = None
+    uncertain_areas: List[str] | None = None
+
+
+class FloorSystemData(BaseModel):
+    floor_joists: List[FloorJoist]
+    floor_drop_beams: List[FloorDropBeam]
+    floor_flush_beams: List[FloorFlushBeam]

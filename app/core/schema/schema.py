@@ -759,7 +759,7 @@ class BottomPlate(BaseModel):
     size: str = ""
     pressure_treated: bool | None = None
     support_material: SupportMaterial | None = None
-    anchor_bolt_spacing_in: float = 72.0          # EXTRACT_IF_VISIBLE | default: 72" (IRC R403.1.6)
+    anchor_bolt_spacing_in: float = 72.0          
     plate_note: str = ""
     uncertain_areas: List[str] | None = None
 
@@ -778,6 +778,7 @@ class WallSystemData(BaseModel):
 class AgentState(BaseModel):
     file_uri: Optional[str] = None
     file_name: Optional[str] = None
+    file_id: Optional[str] = None
 
     # Use lightweight LLM
     project_data: Optional[ProjectData] = None

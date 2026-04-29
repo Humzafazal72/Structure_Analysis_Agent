@@ -309,4 +309,143 @@ Some fields have default values or values that will be calculated later, you don
 <Additional Note>
 If you are uncertain or unsure regarding the extracted value for a component, list the uncertain variable's name in 'uncertain_areas'.
 
-Return ONLY a valid JSON object. No conversational filler before or after.
+Return ONLY a valid JSON object as shown below. No conversational filler before or after:
+class FootingProjectInfo(BaseModel):
+    concrete_fc_footings_psi: int = 2500          
+    concrete_fc_slab_psi: int = 2500              
+    rebar_grade: str = "Grade 60"                 
+    soil_bearing_pressure_psf: float | None = None  
+    soil_bearing_note: str = ""
+    frost_line_depth_in: float | None = None       
+    frost_line_note: str = ""
+    soils_engineer_required: bool | None = None
+    concrete_cover_to_soil_in: float = 3.0        
+    uncertain_areas: List[str] | None = None
+
+
+class ContinuousStripFooting(BaseModel):
+    footing_mark: str
+    existing_condition: bool = False
+    new_load_applied: str = ""
+    location_description: str
+    supported_element: str
+    wall_type: Literal["exterior_bearing", "interior_bearing", "shear_wall", "non_bearing", "grade_beam"]
+    width_in: float | None = None
+    width_note: str = ""
+    depth_in: float | None = None
+    depth_note: str = ""
+    length_ft: float | None = None
+    length_note: str = ""
+    top_of_footing_below_grade_in: float | None = None
+    bottom_of_footing_below_grade_in: float | None = None
+    embedment_note: str = ""
+    frost_compliance: str = ""
+    longitudinal_rebar_size: int | None = None           
+    longitudinal_rebar_count: int | None = None
+    transverse_rebar_size: int | None = None
+    transverse_rebar_spacing_in: float | None = None
+    rebar_orientation: str | None = None                  
+    rebar_faces: str | None = None                       
+    rebar_lap_length_in: float | None = None              
+    concrete_cover_in: float = 3.0                
+    anchor_bolt_dia_in: float = 0.5               
+    anchor_bolt_embedment_in: float = 7.0         
+    anchor_bolt_spacing_in: float = 72.0          
+    anchor_bolt_corner_spacing_in: float = 12.0   
+    anchor_bolt_end_of_plate_max_in: float = 12.0 
+    plate_washer_required: bool | None = None
+    plate_washer_spec: str = ""
+    sill_plate_size: str = ""
+    sill_plate_treated: bool = True               
+    footing_note: str = ""
+    uncertain_areas: List[str] | None = None
+
+
+class PadFooting(BaseModel):
+    footing_mark: str
+    existing_condition: bool = False
+    new_load_applied: str = ""
+    location_description: str
+    supported_element: str
+    width_in: float | None = None
+    length_in: float | None = None
+    depth_in: float | None = None
+    dimension_note: str = ""
+    top_of_footing_below_grade_in: float | None = None
+    bottom_of_footing_below_grade_in: float | None = None
+    embedment_note: str = ""
+    frost_compliance: str = ""
+    rebar_size: int | None = None
+    rebar_spacing_in: float | None = None
+    rebar_orientation: str | None = None                 
+    rebar_faces: str | None = None                       
+    rebar_lap_length_in: float | None = None             
+    concrete_cover_in: float = 3.0                
+    post_base_model: str = ""
+    post_base_anchor_type: Literal["cast_in", "epoxy_set"] | None = None
+    post_size: str = ""
+    footing_note: str = ""
+    uncertain_areas: List[str] | None = None
+
+
+class GradeBeam(BaseModel):
+    footing_mark: str
+    existing_condition: bool = False
+    new_load_applied: str = ""
+    location_description: str
+    supported_element: str
+    bearing_on: Literal["soil", "piers", "piles"] | None = None
+    width_in: float | None = None
+    depth_in: float | None = None
+    length_ft: float | None = None
+    dimension_note: str = ""
+    top_of_beam_below_grade_in: float | None = None
+    bottom_of_beam_below_grade_in: float | None = None
+    frost_compliance: str = ""
+    rebar_size: int | None = None
+    rebar_count: int | None = None
+    rebar_orientation: str | None = None                 
+    rebar_faces: str | None = None                       
+    rebar_lap_length_in: float | None = None             
+    concrete_cover_in: float = 3.0                
+    footing_note: str = ""
+    uncertain_areas: List[str] | None = None
+
+
+class SlabOnGrade(BaseModel):
+    zone: str
+    existing_condition: bool = False
+    thickness_in: float = 4.0                     
+    thickness_note: str = ""
+    reinforcement_type: Literal["rebar", "wwf", "fiber", "none"] | None = None
+    rebar_size: int | None = None
+    rebar_spacing_in: float | None = None
+    rebar_orientation: str | None = None                 
+    wwf_designation: str | None = None
+    vapor_barrier_mils: int = 10                  
+    sub_base_description: str = ""
+    sub_base_depth_in: float | None = None
+    control_joint_spacing_ft: float | None = None        
+    monolithic_with_footing: bool | None = None
+    slab_note: str = ""
+    uncertain_areas: List[str] | None = None
+
+
+class HoldownAnchor(BaseModel):
+    holdown_model: str
+    anchor_rod: str
+    embedment_in: float | None = None
+    location: str
+    supported_wall_mark: str
+    installation_timing: str = ""
+    holdown_note: str = ""
+    uncertain_areas: List[str] | None = None
+
+
+class FootingSystemData(BaseModel):
+    project_info: FootingProjectInfo
+    continuous_strip_footings: List[ContinuousStripFooting]
+    pad_footings: List[PadFooting]
+    grade_beams: List[GradeBeam]
+    slab_on_grade: List[SlabOnGrade]
+    holdown_anchors: List[HoldownAnchor]

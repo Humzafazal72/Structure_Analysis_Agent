@@ -1,1 +1,1 @@
-from .async_visual_extractor import visual_extractor
+from .async_visual_extractor import visual_extractor, visual_extractor_kimi

@@ -88,3 +88,73 @@ If you are uncertain or unsure regarding the extracted value for a component, li
 ## OUTPUT FORMAT
 
 Return valid JSON matching this structure:
+
+class BracedWallLine(BaseModel):
+    bwl_id: str
+    direction: Literal["X", "Y"] | None = None
+    story_level: str
+    bwl_total_length_ft: float | None = None
+    total_braced_length_ft: float | None = None
+    braced_panel_ids: List[str]
+    bwl_spacing_to_adjacent_ft: float | None = None
+    drag_strut_member: str | None = None
+    drag_strut_connector: str | None = None
+    bwl_note: str = ""
+    uncertain_areas: List[str] | None = None
+
+
+class ShearWall(BaseModel):
+    sw_mark: str
+    bwl_id: str
+    story_level: str
+    system_type: str
+    framing_species: str | None = None
+    pier_length_ft: float | None = None
+    wall_height_ft: float | None = None
+    aspect_ratio: float | None = None                        
+    sheathing_thickness_in: float | None = None
+    sheathing_faces: str = Literal["one_side" , "two_sides"]  
+    blocking: str = ""
+    edge_nail_spacing_in: float | None = None
+    field_nail_spacing_in: float | None = None
+    boundary_nail_spacing_in: float | None = None
+    nail_size: str = ""
+    requires_3x_framing: bool = False             
+    stud_size: str = ""
+    stud_spacing_in: float | None = None
+    holdown_model: str = ""
+    holdown_anchor_rod: str = ""
+    holdown_force_lbs: float | None = None        
+    support_connector: str = ""
+    anchor_bolt_dia_in: float | None = None
+    anchor_bolt_spacing_in: float | None = None
+    sill_plate_transfer: str = ""
+    top_plate_transfer: str = ""
+    tabulated_unit_shear_plf: float | None = None       
+    sw_note: str = ""
+    uncertain_areas: List[str] | None = None
+
+
+class NailingZone(BaseModel):
+    zone_label: str
+    nail_spacing_in: float | None = None
+    area_description: str = ""
+    uncertain_areas: List[str] | None = None
+
+
+class Diaphragm(BaseModel):
+    level: str
+    diaphragm_type: str = ""
+    sheathing_type: str = ""
+    sheathing_thickness_in: float | None = None
+    nailing_zones: List[NailingZone] | None = None
+    chord_member: str | None = None
+    collector_lines: List[str] | None = None
+    diaphragm_note: str = ""
+    uncertain_areas: List[str] | None = None
+
+
+class ShearWallData(BaseModel):
+    braced_wall_lines: List[BracedWallLine]
+    shear_walls: List[ShearWall]
+    diaphragms: List[Diaphragm]

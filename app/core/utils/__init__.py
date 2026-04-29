@@ -1,1 +1,1 @@
-from .utils import fetch_with_id
+from .utils import fetch_with_id, fetch_with_id_kimi
