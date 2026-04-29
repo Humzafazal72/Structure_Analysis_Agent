@@ -33,9 +33,8 @@ async def fetch_with_id_kimi(call_id: str, system_prompt: str, file_content: str
                 "content": "Analyze the given structural plan based on the provided system instructions",
             },
         ],
-        response_format={
-            "type": "json_object"
-        },
+        response_format={"type": "json_object"},
+        extra_body={"thinking": {"type": "disabled"}},
     )
 
     content = json.loads(completion.choices[0].message.content)
