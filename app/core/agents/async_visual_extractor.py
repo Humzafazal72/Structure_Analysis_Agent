@@ -1,4 +1,7 @@
+import sys
+import json
 import asyncio
+from anyio import to_thread
 from google.genai import types
 from google.genai.errors import ClientError
 
@@ -19,9 +22,9 @@ from core.llm.prompts import (
     SYS_PROMPT_SHEAR_WALL,
     SYS_PROMPT_WALL,
 )
-from core.llm.clients import openai_client_async
-from core.utils import fetch_with_id, fetch_with_id_kimi
 from services import get_logger
+from core.llm.clients import openai_client_async
+from core.utils import fetch_with_id, fetch_with_id_kimi, process_pdf_to_payload
 
 
 logger = get_logger(__name__)
@@ -103,28 +106,33 @@ async def visual_extractor(agent_state: AgentState):
 
 async def visual_extractor_kimi(agent_state: AgentState):
     #try:
-        floor_config = SYS_PROMPT_FLOOR
-        footing_config = SYS_PROMPT_FOOTING,
-        post_config = SYS_PROMPT_POST,
-        roof_config = SYS_PROMPT_ROOF,
-        shear_wall_config = SYS_PROMPT_SHEAR_WALL,
-        wall_config = SYS_PROMPT_WALL,
+        floor_sys_prompt = SYS_PROMPT_FLOOR
+        footing_sys_prompt = SYS_PROMPT_FOOTING
+        post_sys_prompt = SYS_PROMPT_POST
+        roof_sys_prompt = SYS_PROMPT_ROOF
+        shear_wall_sys_prompt = SYS_PROMPT_SHEAR_WALL
+        wall_sys_prompt = SYS_PROMPT_WALL
 
-        configs = [
-            ("floor", floor_config),
-            ("footing", footing_config),
-            ("post", post_config),
-            ("roof", roof_config),
-            ("shear_wall", shear_wall_config),
-            ("wall", wall_config)
+        sys_prompts = [
+            ("floor", floor_sys_prompt),
+            ("footing", footing_sys_prompt),
+            ("post", post_sys_prompt),
+            ("roof", roof_sys_prompt),
+            ("shear_wall", shear_wall_sys_prompt),
+            ("wall", wall_sys_prompt)
         ]
 
         tasks = []
-        file_content = openai_client_async.files.content(file_id=agent_state.file_id).text
+        payload = await to_thread.run_sync(process_pdf_to_payload, agent_state.temp_file_path)
+        
+        # payload_json = json.dumps(payload)
+        # actual_size_bytes = len(payload_json.encode('utf-8'))
+        # actual_size_mb = actual_size_bytes / (1024 * 1024)
 
-        # Launch tasks with a slight stagger to prevent the 400 error
-        for call_id, config in configs:
-            tasks.append(fetch_with_id_kimi(call_id=call_id, config=config, file_content=file_content))
+        # print(f"Fake sys.getsizeof Size: {sys.getsizeof(payload)} bytes")
+        # print(f"ACTUAL Network Payload Size: {actual_size_mb:.2f} MB")
+        for call_id, sys_prompt in sys_prompts:
+            tasks.append(fetch_with_id_kimi(call_id=call_id, system_prompt=sys_prompt, payload=payload))
             await asyncio.sleep(1)
 
         parsed_data = {}

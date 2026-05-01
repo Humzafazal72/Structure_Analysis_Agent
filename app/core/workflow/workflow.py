@@ -7,7 +7,7 @@ workflow = StateGraph(AgentState)
 
 # Nodes
 # workflow.add_node("visual_extractor",visual_extractor)
-workflow.add_node("visual_extractor", visual_extractor_kimi)
+workflow.add_node("visual_extractor", visual_extractor)
 
 # Edges
 workflow.add_edge(START, "visual_extractor")

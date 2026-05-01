@@ -19,7 +19,7 @@ Field annotations:
 
   uncertain_areas / *_note fields → HITL review flags (keep on all models)
 """
-
+from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
 
@@ -779,6 +779,7 @@ class AgentState(BaseModel):
     file_uri: Optional[str] = None
     file_name: Optional[str] = None
     file_id: Optional[str] = None
+    temp_file_path: Optional[Path] = None
 
     # Use lightweight LLM
     project_data: Optional[ProjectData] = None

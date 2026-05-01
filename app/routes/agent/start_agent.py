@@ -3,6 +3,7 @@ import json
 import random
 import asyncio
 import tempfile
+from pathlib import Path
 from fastapi import UploadFile, Form, File
 from fastapi import APIRouter, HTTPException
 from sse_starlette import EventSourceResponse
@@ -98,7 +99,7 @@ async def start_agent(structure_plan: UploadFile = File(...)):
 # ----------------------------------------v2 with kimi
 @router.post("/api/v2/start_agent")
 async def start_agent(structure_plan: UploadFile = File(...)):
-    try:
+    #try:
         project_id = random.randint(0, 10000) - random.randint(0, 999)
 
         # 1. Read the incoming file content
@@ -109,11 +110,8 @@ async def start_agent(structure_plan: UploadFile = File(...)):
             temp_file.write(file_content)
             temp_file_path = temp_file.name
 
-        file_object = await openai_client_async.files.create(file=temp_file_path, purpose="file-extract")
-
-    
         initial_state = {
-            "file_id": file_object.id
+            "temp_file_path": Path(temp_file_path)
         }
 
         graph_app, cm = await get_graph()
@@ -144,11 +142,8 @@ async def start_agent(structure_plan: UploadFile = File(...)):
                 }
 
             finally:
+                if os.path.exists(temp_file_path):
+                    os.remove(temp_file_path)
                 await cm.__aexit__(None, None, None)
 
         return EventSourceResponse(event_generator())
-
-    finally:
-        # 4. Ensure the temp file is cleaned up no matter what happens
-        if os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
